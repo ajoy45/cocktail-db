@@ -1,27 +1,27 @@
-const loadAllCoctail = (searchText,drinkLimit) => {
+const loadAllCoctail = (searchText, drinkLimit) => {
 
     fetch(`https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${searchText}`)
         .then(res => res.json())
-        .then(data => display(data.drinks,drinkLimit))
+        .then(data => display(data.drinks, drinkLimit))
 
 }
-let serial=0;
-const display = (drinks,drinkLimit) => {
+let serial = 0;
+const display = (drinks, drinkLimit) => {
     const tableBodyContainer = document.getElementById('tableBody');
     // tableBodyContainer.innerHTML='';
     const loadButton = document.getElementById('load-btn');
-   
-    if(drinkLimit && drinks.length>10){
-        drinks =drinks.slice(0,10)
+
+    if (drinkLimit && drinks.length > 10) {
+        drinks = drinks.slice(0, 10)
         loadButton.classList.remove('hidden')
     }
-    else{
+    else {
         loadButton.classList.add('hidden')
     }
-   
+
     drinks.forEach(drink => {
-        serial+=1
-        console.log(drink)
+        serial += 1
+        // console.log(drink)
         const { idDrink, strCategory, dateModified, strDrinkThumb } = drink;
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -42,52 +42,69 @@ const display = (drinks,drinkLimit) => {
                 <td>
                    <p>${idDrink}</p>
                 </td>
-                <td>${dateModified?`${dateModified}`:"have no date"}</td>
+                <td>${dateModified ? `${dateModified}` : "have no date"}</td>
                 <th>
                   
                     <label onclick='loadDetails(${idDrink})' for="modal" class="btn btn-success">details</label>
 
                 </th>
     `
-    tableBodyContainer.appendChild(tr)
-    // loading end
-      loading(false)
+        tableBodyContainer.appendChild(tr)
+        // loading end
+        loading(false)
     })
 }
 // loading progress bar
-const loading=(isLoading)=>{
-    const loadingProgress=document.getElementById('loading-progress');
-    if(isLoading){
+const loading = (isLoading) => {
+    const loadingProgress = document.getElementById('loading-progress');
+    if (isLoading) {
         loadingProgress.classList.remove('hidden')
     }
-    else{
+    else {
         loadingProgress.classList.add('hidden')
     }
 }
 // common search input Text
-const commonSearch=(drinkLimit)=>{
-    const inputField=document.getElementById('simple-search');
-    const value=inputField.value;
-    inputField.value='';
-      loadAllCoctail(value,drinkLimit);
+const commonSearch = (drinkLimit) => {
+    const inputField = document.getElementById('simple-search');
+    const value = inputField.value;
+    inputField.value = '';
+    loadAllCoctail(value, drinkLimit);
     //   loading start
-      loading(true)
-      
+    loading(true)
+
 }
 
 // search by input text
-document.getElementById('simple-search').addEventListener('keypress',function(e){
-    if(e.key==='Enter'){
+document.getElementById('simple-search').addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
         commonSearch(10)
     }
 })
 // load more button
-const loadMoreButton=()=>{
+const loadMoreButton = () => {
     commonSearch()
 }
 
-const loadDetails=async(id)=>{
-   const res=await fetch(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${id}`);
-   const data=await res.json();
-   console.log(data)
+const loadDetails = async (id) => {
+    const res = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${id}`);
+    const data = await res.json();
+    displayDetails(data.drinks[0])
+ 
+}
+const displayDetails = (details) => {
+    console.log(details)
+    const{strDrinkThumb,strInstructionsIT}=details
+    const modalContainer = document.getElementById('modal-container');
+    const div = document.createElement('div');
+    modalContainer.innerHTML='';
+    div.classList.add('modal-box');
+    div.innerHTML = `
+                    <img src="${strDrinkThumb}" alt="">
+                    <p class="py-4"><span class='text-3xl font-bold'>Instruction:</span>${strInstructionsIT}</p>
+                    <div class="modal-action">
+                        <label for="modal" class="btn">close</label>
+                    </div>
+    `
+    modalContainer.appendChild(div)
 }
